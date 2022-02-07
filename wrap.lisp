@@ -21,6 +21,10 @@
                                 (cffi:foreign-free sqe)
                                 (cffi:foreign-free cqe)))))
 
+(defmethod get-sqe ((ring ring))
+  (io_uring_get_sqe (ring ring)))
 
-(defmethod read-file ((ring ring) (path string))
-  )
+(defmethod read-file ((ring ring) (path string) &key (directory +at-fdcwd+))
+  (let ((sqe (io_uring_get_sqe (ring ring))))
+    ;; TODO if directory is passed to us, get an fd on that
+    (io_uring_prep_openat sqe directory path 0 0)))
