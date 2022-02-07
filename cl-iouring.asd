@@ -3,7 +3,7 @@
   :depends-on (#:cffi #:cffi-helpers #:trivial-garbage)
   :serial t
   :components ((:file "package")
+               (:file "ffi")
                (:cffi-grovel-file "grovel")
-               (:cffi-wrapper-file "grovel-wrapper")
-               (:file "wrap")
-               (:file "ffi")))
+               (:cffi-wrapper-file "ffi-grovel")
+               (:file "wrap")))
