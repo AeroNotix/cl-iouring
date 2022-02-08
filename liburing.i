@@ -1,3 +1,5 @@
+#define __attribute__(x)
+
 %typemap(cin)   __u64     ":unsigned-long-long"
 %typemap(cin)   bool      ":bool"
 %typemap(cin)   int64_t   ":int64-t"
@@ -24,3 +26,4 @@
 %}
 
 %include "/usr/include/liburing.h"
+%include "/usr/include/liburing/io_uring.h"
