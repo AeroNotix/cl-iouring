@@ -1,7 +1,7 @@
 (in-package #:cl-iouring)
 
 (defclass ring ()
-  ((ring :initform (cffi-helpers:safe-foreign-alloc '(:struct io_uring)) :accessor ring)
+  ((ring :initform (cffi:foreign-alloc '(:struct io_uring)) :accessor ring)
    (flags :initarg :flags :initform 0 :accessor flags)
    (entries :initarg :entries :initform (error "You must supply the ring size") :accessor entries)))
 
@@ -21,7 +21,7 @@
 (defmethod read-file ((ring ring) (path string) &key (directory +at-fdcwd+))
   ;; TODO if directory is passed to us, get an fd on that
   (let* ((sqe (io_uring_get_sqe (ring ring)))
-         (cqe (cffi-helpers:safe-foreign-alloc '(:struct io_uring_cqe)))
+         (cqe (cffi:foreign-alloc '(:struct io_uring_cqe)))
          (size (osicat-posix:stat-size (osicat-posix:stat path)))
          (fd (osicat-posix:openat directory path osicat-posix:o-rdonly))
          (buf (cffi:make-shareable-byte-vector size)))

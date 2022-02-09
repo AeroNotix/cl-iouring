@@ -1,6 +1,6 @@
 (defsystem #:cl-iouring
   :defsystem-depends-on (#:cffi-grovel)
-  :depends-on (#:cffi #:cffi-helpers #:trivial-garbage #:osicat)
+  :depends-on (#:cffi #:trivial-garbage #:osicat)
   :serial t
   :components ((:file "package")
                (:file "ffi")
