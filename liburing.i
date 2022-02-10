@@ -1,6 +1,7 @@
 #define __attribute__(x)
 
 %typemap(cin)   __u64     ":unsigned-long-long"
+%typemap(cin)   __s32     ":unsigned-int"
 %typemap(cin)   bool      ":bool"
 %typemap(cin)   int64_t   ":int64-t"
 %typemap(cin)   mode_t    ":unsigned-int"
