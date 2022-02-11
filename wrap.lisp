@@ -30,8 +30,8 @@
         (when (< ret 0)
           (error "Error waiting for completion"))
         (cffi:foreign-free cqe)
-        (osicat-posix:close fd)
-        (cffi:foreign-string-to-lisp buf)))))
+        (osicat-posix:close fd)))
+    buf))
 
 (defmethod readv-file ((ring ring) (path string) &key (block-size 1024))
   (let* ((ring (ring ring))
@@ -68,5 +68,5 @@
           (error "Async readv failed"))
         (io_uring_cqe_seen ring cqe)
         (osicat-posix:close fd)
-        (cffi:foreign-free cqe)
-        (cffi:foreign-string-to-lisp buf)))))
+        (cffi:foreign-free cqe)))
+    buf))
