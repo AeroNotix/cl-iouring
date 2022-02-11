@@ -10,9 +10,7 @@
   (let ((cring (ring ring)))
     (trivial-garbage:finalize ring
                               (lambda ()
-                                ;; TODO: remove format messages
-                                (format t "Freeing~%")
-                                (format t "Freeing ~D~%" (io_uring_queue_exit cring))
+                                (io_uring_queue_exit cring)
                                 (cffi:foreign-free cring)))))
 
 (defmethod get-sqe ((ring ring))
@@ -63,10 +61,12 @@
             (setf (cffi:foreign-slot-value ptr '(:struct osicat-posix::iovec) 'osicat-posix::base) (cffi:inc-pointer buf (* i block-size)))))
         (io_uring_prep_readv sqe fd iovecs required-blocks 0)
         (io_uring_submit ring)
-        (when (< (io_uring_wait_cqe ring cqe) 0)
-          (error "Error waiting for completion"))
+        (let ((wait (io_uring_wait_cqe ring cqe)))
+          (when (< wait 0)
+            (error "Error waiting for completion")))
         (when (< (cffi:foreign-slot-value cqe '(:struct io_uring_cqe) 'res) 0)
           (error "Async readv failed"))
         (io_uring_cqe_seen ring cqe)
         (osicat-posix:close fd)
+        (cffi:foreign-free cqe)
         (cffi:foreign-string-to-lisp buf)))))

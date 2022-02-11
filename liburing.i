@@ -1,14 +1,14 @@
 #define __attribute__(x)
 
 %typemap(cin)   __u64     ":unsigned-long-long"
-%typemap(cin)   __s32     ":unsigned-int"
+%typemap(cin)   __s32     ":int32"
 %typemap(cin)   bool      ":bool"
 %typemap(cin)   int64_t   ":int64-t"
 %typemap(cin)   mode_t    ":unsigned-int"
 %typemap(cin)   off_t     ":unsigned-int";
 %typemap(cin)   size_t    ":size-t";
 %typemap(cin)   socklen_t ":socklen-t"
-%typemap(cin)   ssize_t   ":int";
+%typemap(cin)   ssize_t   ":int"
 %typemap(cout)  bool      ":bool"
 
 %insert("lisphead") %{

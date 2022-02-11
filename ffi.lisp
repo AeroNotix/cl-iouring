@@ -266,7 +266,7 @@
 	(opcode :pointer)
 	(flags :pointer)
 	(ioprio :pointer)
-	(fd :unsigned-int)
+	(fd :int32)
 	(off :unsigned-long-long)
 	(addr2 :unsigned-long-long)
 	(addr :unsigned-long-long)
@@ -292,7 +292,7 @@
 	(buf_index :pointer)
 	(buf_group :pointer)
 	(personality :pointer)
-	(splice_fd_in :unsigned-int)
+	(splice_fd_in :int32)
 	(file_index :pointer)
 	(__pad2 :pointer :count 2))
 
@@ -387,7 +387,7 @@
 
 (cffi:defcstruct io_uring_cqe
 	(user_data :unsigned-long-long)
-	(res :unsigned-int)
+	(res :int32)
 	(flags :pointer))
 
 (cl:defconstant IORING_CQE_F_BUFFER (cl:ash 1 0))
