@@ -4,7 +4,7 @@
 ;;; Do not make changes to this file unless you know what you are doing--modify
 ;;; the SWIG interface file instead.
 
-(in-package #:cl-iouring)
+(in-package #:iouring)
 (cffi:defctype :u64 :unsigned-long-long)
 (cffi:defctype :size-t :unsigned-long)
 (cffi:defctype :int64-t :int64)
@@ -271,29 +271,29 @@
 	(addr2 :unsigned-long-long)
 	(addr :unsigned-long-long)
 	(splice_off_in :unsigned-long-long)
-	(len :pointer)
+	(len :uint32)
 	(rw_flags :pointer)
-	(fsync_flags :pointer)
+	(fsync_flags :uint32)
 	(poll_events :pointer)
-	(poll32_events :pointer)
-	(sync_range_flags :pointer)
-	(msg_flags :pointer)
-	(timeout_flags :pointer)
-	(accept_flags :pointer)
-	(cancel_flags :pointer)
-	(open_flags :pointer)
-	(statx_flags :pointer)
-	(fadvise_advice :pointer)
-	(splice_flags :pointer)
-	(rename_flags :pointer)
-	(unlink_flags :pointer)
-	(hardlink_flags :pointer)
+	(poll32_events :uint32)
+	(sync_range_flags :uint32)
+	(msg_flags :uint32)
+	(timeout_flags :uint32)
+	(accept_flags :uint32)
+	(cancel_flags :uint32)
+	(open_flags :uint32)
+	(statx_flags :uint32)
+	(fadvise_advice :uint32)
+	(splice_flags :uint32)
+	(rename_flags :uint32)
+	(unlink_flags :uint32)
+	(hardlink_flags :uint32)
 	(user_data :unsigned-long-long)
 	(buf_index :pointer)
 	(buf_group :pointer)
 	(personality :pointer)
 	(splice_fd_in :int32)
-	(file_index :pointer)
+	(file_index :uint32)
 	(__pad2 :pointer :count 2))
 
 (defanonenum 
@@ -388,7 +388,7 @@
 (cffi:defcstruct io_uring_cqe
 	(user_data :unsigned-long-long)
 	(res :int32)
-	(flags :pointer))
+	(flags :uint32))
 
 (cl:defconstant IORING_CQE_F_BUFFER (cl:ash 1 0))
 
@@ -404,14 +404,14 @@
 (cl:defconstant IORING_OFF_SQES #x10000000)
 
 (cffi:defcstruct io_sqring_offsets
-	(head :pointer)
-	(tail :pointer)
-	(ring_mask :pointer)
-	(ring_entries :pointer)
-	(flags :pointer)
-	(dropped :pointer)
-	(array :pointer)
-	(resv1 :pointer)
+	(head :uint32)
+	(tail :uint32)
+	(ring_mask :uint32)
+	(ring_entries :uint32)
+	(flags :uint32)
+	(dropped :uint32)
+	(array :uint32)
+	(resv1 :uint32)
 	(resv2 :unsigned-long-long))
 
 (cl:defconstant IORING_SQ_NEED_WAKEUP (cl:ash 1 0))
@@ -419,14 +419,14 @@
 (cl:defconstant IORING_SQ_CQ_OVERFLOW (cl:ash 1 1))
 
 (cffi:defcstruct io_cqring_offsets
-	(head :pointer)
-	(tail :pointer)
-	(ring_mask :pointer)
-	(ring_entries :pointer)
-	(overflow :pointer)
-	(cqes :pointer)
-	(flags :pointer)
-	(resv1 :pointer)
+	(head :uint32)
+	(tail :uint32)
+	(ring_mask :uint32)
+	(ring_entries :uint32)
+	(overflow :uint32)
+	(cqes :uint32)
+	(flags :uint32)
+	(resv1 :uint32)
 	(resv2 :unsigned-long-long))
 
 (cl:defconstant IORING_CQ_EVENTFD_DISABLED (cl:ash 1 0))
@@ -440,13 +440,13 @@
 (cl:defconstant IORING_ENTER_EXT_ARG (cl:ash 1 3))
 
 (cffi:defcstruct io_uring_params
-	(sq_entries :pointer)
-	(cq_entries :pointer)
-	(flags :pointer)
-	(sq_thread_cpu :pointer)
-	(sq_thread_idle :pointer)
-	(features :pointer)
-	(wq_fd :pointer)
+	(sq_entries :uint32)
+	(cq_entries :uint32)
+	(flags :uint32)
+	(sq_thread_cpu :uint32)
+	(sq_thread_idle :uint32)
+	(features :uint32)
+	(wq_fd :uint32)
 	(resv :pointer :count 3)
 	(sq_off io_sqring_offsets)
 	(cq_off io_cqring_offsets))
@@ -497,29 +497,29 @@
 	IORING_REGISTER_LAST)
 
 (cffi:defcstruct io_uring_files_update
-	(offset :pointer)
-	(resv :pointer)
+	(offset :uint32)
+	(resv :uint32)
 	(fds :pointer))
 
 (cffi:defcstruct io_uring_rsrc_register
-	(nr :pointer)
-	(resv :pointer)
+	(nr :uint32)
+	(resv :uint32)
 	(resv2 :unsigned-long-long)
 	(data :pointer)
 	(tags :pointer))
 
 (cffi:defcstruct io_uring_rsrc_update
-	(offset :pointer)
-	(resv :pointer)
+	(offset :uint32)
+	(resv :uint32)
 	(data :pointer))
 
 (cffi:defcstruct io_uring_rsrc_update2
-	(offset :pointer)
-	(resv :pointer)
+	(offset :uint32)
+	(resv :uint32)
 	(data :pointer)
 	(tags :pointer)
-	(nr :pointer)
-	(resv2 :pointer))
+	(nr :uint32)
+	(resv2 :uint32))
 
 (cl:defconstant IORING_REGISTER_FILES_SKIP -2)
 
@@ -529,7 +529,7 @@
 	(op :pointer)
 	(resv :pointer)
 	(flags :pointer)
-	(resv2 :pointer))
+	(resv2 :uint32))
 
 (cffi:defcstruct io_uring_probe
 	(last_op :pointer)
@@ -555,8 +555,8 @@
 
 (cffi:defcstruct io_uring_getevents_arg
 	(sigmask :unsigned-long-long)
-	(sigmask_sz :pointer)
-	(pad :pointer)
+	(sigmask_sz :uint32)
+	(pad :uint32)
 	(ts :unsigned-long-long))
 
 
