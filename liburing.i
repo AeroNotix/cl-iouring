@@ -1,6 +1,7 @@
 #define __attribute__(x)
 
 %typemap(cin)   __u64     ":unsigned-long-long"
+%typemap(cin)   __u32     ":uint32"
 %typemap(cin)   __s32     ":int32"
 %typemap(cin)   bool      ":bool"
 %typemap(cin)   int64_t   ":int64-t"
@@ -12,7 +13,7 @@
 %typemap(cout)  bool      ":bool"
 
 %insert("lisphead") %{
-(in-package #:cl-iouring)
+(in-package #:iouring)
 (cffi:defctype :u64 :unsigned-long-long)
 (cffi:defctype :size-t :unsigned-long)
 (cffi:defctype :int64-t :int64)
@@ -23,7 +24,7 @@
 (include "sys/types.h")
 (include "inttypes.h")
 (include "liburing.h")
-(in-package #:cl-iouring)
+(in-package #:iouring)
 %}
 
 %include "/usr/include/liburing.h"

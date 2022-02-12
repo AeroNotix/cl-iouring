@@ -1,4 +1,4 @@
-(in-package #:cl-iouring)
+(in-package #:iouring)
 
 (include "fcntl.h")
 (constant (+at-fdcwd+ "AT_FDCWD"))

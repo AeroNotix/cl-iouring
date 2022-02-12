@@ -2,7 +2,7 @@
 (include "sys/types.h")
 (include "inttypes.h")
 (include "liburing.h")
-(in-package #:cl-iouring)
+(in-package #:iouring)
 
 
 

@@ -1,5 +1,5 @@
-(defpackage #:cl-iouring
-  (:use #:cl)
+(defpackage #:iouring
+  (:use #:cl #:iouring-sys)
   (:import-from #:cffi #:defcstruct #:defcfun))
 
 (cffi:define-foreign-library liburing
