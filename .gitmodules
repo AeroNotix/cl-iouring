@@ -1,0 +1,3 @@
+[submodule "swig"]
+	path = swig
+	url = git@github.com:AeroNotix/swig.git
