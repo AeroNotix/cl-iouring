@@ -95,7 +95,10 @@
 	(flags :unsigned-int)
 	(ring_fd :int)
 	(features :unsigned-int)
-	(pad :pointer :count 3))
+	(enter_ring_fd :int)
+	(int_flags :pointer)
+	(pad :pointer :count 3)
+	(pad2 :unsigned-int))
 
 (cffi:defcfun ("io_uring_get_probe_ring" io_uring_get_probe_ring) :pointer
   (ring :pointer))
@@ -150,8 +153,12 @@
   (ring :pointer)
   (wait_nr :unsigned-int))
 
-(cffi:defcfun ("io_uring_get_sqe" io_uring_get_sqe) :pointer
-  (ring :pointer))
+(cffi:defcfun ("io_uring_submit_and_wait_timeout" io_uring_submit_and_wait_timeout) :int
+  (ring :pointer)
+  (cqe_ptr :pointer)
+  (wait_nr :unsigned-int)
+  (ts :pointer)
+  (sigmask :pointer))
 
 (cffi:defcfun ("io_uring_register_buffers" io_uring_register_buffers) :int
   (ring :pointer)
@@ -162,6 +169,10 @@
   (ring :pointer)
   (iovecs :pointer)
   (tags :pointer)
+  (nr :unsigned-int))
+
+(cffi:defcfun ("io_uring_register_buffers_sparse" io_uring_register_buffers_sparse) :int
+  (ring :pointer)
   (nr :unsigned-int))
 
 (cffi:defcfun ("io_uring_register_buffers_update_tag" io_uring_register_buffers_update_tag) :int
@@ -183,6 +194,10 @@
   (ring :pointer)
   (files :pointer)
   (tags :pointer)
+  (nr :unsigned-int))
+
+(cffi:defcfun ("io_uring_register_files_sparse" io_uring_register_files_sparse) :int
+  (ring :pointer)
   (nr :unsigned-int))
 
 (cffi:defcfun ("io_uring_register_files_update_tag" io_uring_register_files_update_tag) :int
@@ -247,6 +262,21 @@
   (ring :pointer)
   (values :pointer))
 
+(cffi:defcfun ("io_uring_register_ring_fd" io_uring_register_ring_fd) :int
+  (ring :pointer))
+
+(cffi:defcfun ("io_uring_unregister_ring_fd" io_uring_unregister_ring_fd) :int
+  (ring :pointer))
+
+(cffi:defcfun ("io_uring_register_buf_ring" io_uring_register_buf_ring) :int
+  (ring :pointer)
+  (reg :pointer)
+  (flags :unsigned-int))
+
+(cffi:defcfun ("io_uring_unregister_buf_ring" io_uring_unregister_buf_ring) :int
+  (ring :pointer)
+  (bgid :int))
+
 (cffi:defcfun ("__io_uring_get_cqe" __io_uring_get_cqe) :int
   (ring :pointer)
   (cqe_ptr :pointer)
@@ -288,13 +318,17 @@
 	(rename_flags :uint32)
 	(unlink_flags :uint32)
 	(hardlink_flags :uint32)
+	(xattr_flags :uint32)
 	(user_data :unsigned-long-long)
 	(buf_index :pointer)
 	(buf_group :pointer)
 	(personality :pointer)
 	(splice_fd_in :int32)
 	(file_index :uint32)
-	(__pad2 :pointer :count 2))
+	(addr3 :unsigned-long-long)
+	(__pad2 :pointer :count 1))
+
+(cl:defconstant IORING_FILE_INDEX_ALLOC (cl:lognot 0))
 
 (defanonenum 
 	IOSQE_FIXED_FILE_BIT
@@ -302,7 +336,8 @@
 	IOSQE_IO_LINK_BIT
 	IOSQE_IO_HARDLINK_BIT
 	IOSQE_ASYNC_BIT
-	IOSQE_BUFFER_SELECT_BIT)
+	IOSQE_BUFFER_SELECT_BIT
+	IOSQE_CQE_SKIP_SUCCESS_BIT)
 
 (cl:defconstant IORING_SETUP_IOPOLL (cl:ash 1 0))
 
@@ -318,48 +353,65 @@
 
 (cl:defconstant IORING_SETUP_R_DISABLED (cl:ash 1 6))
 
-(defanonenum 
-	IORING_OP_NOP
-	IORING_OP_READV
-	IORING_OP_WRITEV
-	IORING_OP_FSYNC
-	IORING_OP_READ_FIXED
-	IORING_OP_WRITE_FIXED
-	IORING_OP_POLL_ADD
-	IORING_OP_POLL_REMOVE
-	IORING_OP_SYNC_FILE_RANGE
-	IORING_OP_SENDMSG
-	IORING_OP_RECVMSG
-	IORING_OP_TIMEOUT
-	IORING_OP_TIMEOUT_REMOVE
-	IORING_OP_ACCEPT
-	IORING_OP_ASYNC_CANCEL
-	IORING_OP_LINK_TIMEOUT
-	IORING_OP_CONNECT
-	IORING_OP_FALLOCATE
-	IORING_OP_OPENAT
-	IORING_OP_CLOSE
-	IORING_OP_FILES_UPDATE
-	IORING_OP_STATX
-	IORING_OP_READ
-	IORING_OP_WRITE
-	IORING_OP_FADVISE
-	IORING_OP_MADVISE
-	IORING_OP_SEND
-	IORING_OP_RECV
-	IORING_OP_OPENAT2
-	IORING_OP_EPOLL_CTL
-	IORING_OP_SPLICE
-	IORING_OP_PROVIDE_BUFFERS
-	IORING_OP_REMOVE_BUFFERS
-	IORING_OP_TEE
-	IORING_OP_SHUTDOWN
-	IORING_OP_RENAMEAT
-	IORING_OP_UNLINKAT
-	IORING_OP_MKDIRAT
-	IORING_OP_SYMLINKAT
-	IORING_OP_LINKAT
-	IORING_OP_LAST)
+(cl:defconstant IORING_SETUP_SUBMIT_ALL (cl:ash 1 7))
+
+(cl:defconstant IORING_SETUP_COOP_TASKRUN (cl:ash 1 8))
+
+(cl:defconstant IORING_SETUP_TASKRUN_FLAG (cl:ash 1 9))
+
+(cl:defconstant IORING_SETUP_SQE128 (cl:ash 1 10))
+
+(cl:defconstant IORING_SETUP_CQE32 (cl:ash 1 11))
+
+(cffi:defcenum io_uring_op
+	:IORING_OP_NOP
+	:IORING_OP_READV
+	:IORING_OP_WRITEV
+	:IORING_OP_FSYNC
+	:IORING_OP_READ_FIXED
+	:IORING_OP_WRITE_FIXED
+	:IORING_OP_POLL_ADD
+	:IORING_OP_POLL_REMOVE
+	:IORING_OP_SYNC_FILE_RANGE
+	:IORING_OP_SENDMSG
+	:IORING_OP_RECVMSG
+	:IORING_OP_TIMEOUT
+	:IORING_OP_TIMEOUT_REMOVE
+	:IORING_OP_ACCEPT
+	:IORING_OP_ASYNC_CANCEL
+	:IORING_OP_LINK_TIMEOUT
+	:IORING_OP_CONNECT
+	:IORING_OP_FALLOCATE
+	:IORING_OP_OPENAT
+	:IORING_OP_CLOSE
+	:IORING_OP_FILES_UPDATE
+	:IORING_OP_STATX
+	:IORING_OP_READ
+	:IORING_OP_WRITE
+	:IORING_OP_FADVISE
+	:IORING_OP_MADVISE
+	:IORING_OP_SEND
+	:IORING_OP_RECV
+	:IORING_OP_OPENAT2
+	:IORING_OP_EPOLL_CTL
+	:IORING_OP_SPLICE
+	:IORING_OP_PROVIDE_BUFFERS
+	:IORING_OP_REMOVE_BUFFERS
+	:IORING_OP_TEE
+	:IORING_OP_SHUTDOWN
+	:IORING_OP_RENAMEAT
+	:IORING_OP_UNLINKAT
+	:IORING_OP_MKDIRAT
+	:IORING_OP_SYMLINKAT
+	:IORING_OP_LINKAT
+	:IORING_OP_MSG_RING
+	:IORING_OP_FSETXATTR
+	:IORING_OP_SETXATTR
+	:IORING_OP_FGETXATTR
+	:IORING_OP_GETXATTR
+	:IORING_OP_SOCKET
+	:IORING_OP_URING_CMD
+	:IORING_OP_LAST)
 
 (cl:defconstant IORING_FSYNC_DATASYNC (cl:ash 1 0))
 
@@ -373,6 +425,8 @@
 
 (cl:defconstant IORING_LINK_TIMEOUT_UPDATE (cl:ash 1 4))
 
+(cl:defconstant IORING_TIMEOUT_ETIME_SUCCESS (cl:ash 1 5))
+
 (cl:defconstant IORING_TIMEOUT_CLOCK_MASK (cl:logior (cl:ash 1 2) (cl:ash 1 3)))
 
 (cl:defconstant IORING_TIMEOUT_UPDATE_MASK (cl:logior (cl:ash 1 1) (cl:ash 1 4)))
@@ -385,14 +439,27 @@
 
 (cl:defconstant IORING_POLL_UPDATE_USER_DATA (cl:ash 1 2))
 
+(cl:defconstant IORING_ASYNC_CANCEL_ALL (cl:ash 1 0))
+
+(cl:defconstant IORING_ASYNC_CANCEL_FD (cl:ash 1 1))
+
+(cl:defconstant IORING_ASYNC_CANCEL_ANY (cl:ash 1 2))
+
+(cl:defconstant IORING_RECVSEND_POLL_FIRST (cl:ash 1 0))
+
+(cl:defconstant IORING_ACCEPT_MULTISHOT (cl:ash 1 0))
+
 (cffi:defcstruct io_uring_cqe
 	(user_data :unsigned-long-long)
 	(res :int32)
-	(flags :uint32))
+	(flags :uint32)
+	(big_cqe :pointer))
 
 (cl:defconstant IORING_CQE_F_BUFFER (cl:ash 1 0))
 
 (cl:defconstant IORING_CQE_F_MORE (cl:ash 1 1))
+
+(cl:defconstant IORING_CQE_F_SOCK_NONEMPTY (cl:ash 1 2))
 
 (defanonenum 
 	(IORING_CQE_BUFFER_SHIFT 16))
@@ -418,6 +485,8 @@
 
 (cl:defconstant IORING_SQ_CQ_OVERFLOW (cl:ash 1 1))
 
+(cl:defconstant IORING_SQ_TASKRUN (cl:ash 1 2))
+
 (cffi:defcstruct io_cqring_offsets
 	(head :uint32)
 	(tail :uint32)
@@ -438,6 +507,8 @@
 (cl:defconstant IORING_ENTER_SQ_WAIT (cl:ash 1 2))
 
 (cl:defconstant IORING_ENTER_EXT_ARG (cl:ash 1 3))
+
+(cl:defconstant IORING_ENTER_REGISTERED_RING (cl:ash 1 4))
 
 (cffi:defcstruct io_uring_params
 	(sq_entries :uint32)
@@ -473,6 +544,10 @@
 
 (cl:defconstant IORING_FEAT_RSRC_TAGS (cl:ash 1 10))
 
+(cl:defconstant IORING_FEAT_CQE_SKIP (cl:ash 1 11))
+
+(cl:defconstant IORING_FEAT_LINKED_FILE (cl:ash 1 12))
+
 (defanonenum 
 	(IORING_REGISTER_BUFFERS 0)
 	(IORING_UNREGISTER_BUFFERS 1)
@@ -494,16 +569,26 @@
 	(IORING_REGISTER_IOWQ_AFF 17)
 	(IORING_UNREGISTER_IOWQ_AFF 18)
 	(IORING_REGISTER_IOWQ_MAX_WORKERS 19)
+	(IORING_REGISTER_RING_FDS 20)
+	(IORING_UNREGISTER_RING_FDS 21)
+	(IORING_REGISTER_PBUF_RING 22)
+	(IORING_UNREGISTER_PBUF_RING 23)
 	IORING_REGISTER_LAST)
+
+(defanonenum 
+	IO_WQ_BOUND
+	IO_WQ_UNBOUND)
 
 (cffi:defcstruct io_uring_files_update
 	(offset :uint32)
 	(resv :uint32)
 	(fds :pointer))
 
+(cl:defconstant IORING_RSRC_REGISTER_SPARSE (cl:ash 1 0))
+
 (cffi:defcstruct io_uring_rsrc_register
 	(nr :uint32)
-	(resv :uint32)
+	(flags :uint32)
 	(resv2 :unsigned-long-long)
 	(data :pointer)
 	(tags :pointer))
@@ -536,7 +621,7 @@
 	(ops_len :pointer)
 	(resv :pointer)
 	(resv2 :pointer :count 3)
-	(ops :pointer))
+	(ops :pointer :count 0))
 
 (cffi:defcstruct io_uring_restriction
 	(opcode :pointer)
@@ -545,6 +630,26 @@
 	(sqe_flags :pointer)
 	(resv :pointer)
 	(resv2 :pointer :count 3))
+
+(cffi:defcstruct io_uring_buf
+	(addr :unsigned-long-long)
+	(len :uint32)
+	(bid :pointer)
+	(resv :pointer))
+
+(cffi:defcstruct io_uring_buf_ring
+	(resv1 :unsigned-long-long)
+	(resv2 :uint32)
+	(resv3 :pointer)
+	(tail :pointer)
+	(bufs :pointer :count 0))
+
+(cffi:defcstruct io_uring_buf_reg
+	(ring_addr :unsigned-long-long)
+	(ring_entries :uint32)
+	(bgid :pointer)
+	(pad :pointer)
+	(resv :pointer :count 3))
 
 (defanonenum 
 	(IORING_RESTRICTION_REGISTER_OP 0)
