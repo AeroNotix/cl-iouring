@@ -15,11 +15,13 @@
 (defmethod initialize-instance :after ((ring ring) &key)
   (let ((params (zeroed-foreign-alloc '(:struct io_uring_params))))
     (setf (cffi:foreign-slot-value params '(:struct io_uring_params) 'flags) (flags ring))
+    (setf (params ring) params)
     (io_uring_queue_init_params (entries ring) (ring ring) params)
     (let ((cring (ring ring)))
       (trivial-garbage:finalize ring
                                 (lambda ()
                                   (io_uring_queue_exit cring)
+                                  (cffi:foreign-free params)
                                   (cffi:foreign-free cring))))))
 
 (defmethod read-file ((ring ring) (path string) &key (directory +at-fdcwd+))
